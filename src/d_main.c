@@ -856,6 +856,11 @@ bool D_IsNERVEWAD(char *filename)
     return (M_StringCompare(leafname(filename), "NERVE.WAD"));
 }
 
+bool D_IsEXTRASWAD(char *filename)
+{
+    return (M_StringCompare(leafname(filename), "extras.wad"));
+}
+
 bool D_IsDOOMIWAD(char *filename)
 {
     const char  *file = leafname(filename);
@@ -990,6 +995,10 @@ void D_CheckSupportedPWAD(char *filename)
         ganymede = true;
     else if (M_StringCompare(leaf, "HarmonyC.wad"))
         harmonyc = true;
+    else if (M_StringCompare(leaf, "ID1.wad"))
+        ID1 = true;
+    else if (M_StringCompare(leaf, "masterlevels.wad"))
+        masterlevels = true;
     else if (M_StringCompare(leaf, "neis.wad"))
         neis = true;
     else if (M_StringCompare(leaf, "TVR!.wad"))
@@ -1020,9 +1029,24 @@ static bool D_IsUnsupportedPWAD(char *filename)
     return (error = (M_StringCompare(leafname(filename), DOOMRETRO_RESOURCEWAD)));
 }
 
+static void D_AutoloadExtrasWAD(void)
+{
+    char    path[MAX_PATH];
+
+    if (M_CheckParm("-noautoload") || M_CheckParm("-nomusic") || M_CheckParm("-nosound"))
+        return;
+
+    M_snprintf(path, sizeof(path), "%s" DIR_SEPARATOR_S "%s", wadfolder, "extras.wad");
+
+    if (W_MergeFile(path, true))
+        extras = true;
+}
+
 static void D_AutoloadSIGILWAD(void)
 {
     char    path[MAX_PATH];
+
+    D_AutoloadExtrasWAD();
 
     if (sigil || sigil2 || M_CheckParm("-noautoload"))
         return;
@@ -1076,6 +1100,8 @@ static void D_AutoloadSIGIL2WAD(void)
 {
     char    path[MAX_PATH];
 
+    D_AutoloadExtrasWAD();
+
     if (!autosigil || M_CheckParm("-noautoload"))
         return;
 
@@ -1091,11 +1117,14 @@ static void D_AutoloadSIGIL2WAD(void)
         if (W_MergeFile(path, true))
             sigil = true;
     }
+
 }
 
 static void D_AutoloadNerveWAD(void)
 {
     char    path[MAX_PATH];
+
+    D_AutoloadExtrasWAD();
 
     if (BTSX || M_CheckParm("-noautoload"))
         return;
@@ -2413,7 +2442,7 @@ static void D_DoomMainSetup(void)
     FREEDM = (W_CheckNumForName("FREEDM") >= 0);
 
     PLAYPALs = (FREEDOOM || chex || hacx || harmony || REKKRSA ? 2 : W_GetNumLumps("PLAYPAL"));
-    STBARs = W_GetNumLumps("STBAR");
+    STBARs = (ID1 ? 2 : W_GetNumLumps("STBAR"));
 
     DBIGFONT = (W_CheckNumForName("DBIGFONT") >= 0);
     DSFLAMST = (W_GetNumLumps("DSFLAMST") > 1);

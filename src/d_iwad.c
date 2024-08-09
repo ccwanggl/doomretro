@@ -223,8 +223,10 @@ static const char *steam_install_subdirs[] =
     "steamapps\\common\\Doom 2\\base",
     "steamapps\\common\\Doom 2\\finaldoombase",
     "steamapps\\common\\Doom 2\\masterbase\\doom2",
+    "steamapps\\common\\Ultimate Doom\\rerelease",
     "steamapps\\common\\Ultimate Doom\\rerelease\\DOOM_Data\\StreamingAssets",
     "steamapps\\common\\Ultimate Doom\\base"
+    "steamapps\\common\\Ultimate Doom\\base\\doom2"
     "steamapps\\common\\DOOM 3 BFG Edition\\base\\wads",
     "steamapps\\common\\Final Doom\\base",
     "steamapps\\common\\Master Levels of Doom\\doom2",
@@ -975,8 +977,12 @@ void D_SetGameDescription(void)
         M_StringCopy(gamedescription, s_CAPTION_GANYMEDE, sizeof(gamedescription));
     else if (harmony || harmonyc)
         M_StringCopy(gamedescription, s_CAPTION_HARMONY, sizeof(gamedescription));
+    else if (ID1)
+        M_StringCopy(gamedescription, s_CAPTION_ID1, sizeof(gamedescription));
     else if (KDIKDIZD)
         M_StringCopy(gamedescription, s_CAPTION_KDIKDIZD, sizeof(gamedescription));
+    else if (masterlevels)
+        M_StringCopy(gamedescription, s_CAPTION_MASTERLEVELS, sizeof(gamedescription));
     else if (neis)
         M_StringCopy(gamedescription, s_CAPTION_NEIS, sizeof(gamedescription));
     else if (revolution)

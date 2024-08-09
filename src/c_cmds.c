@@ -4885,6 +4885,8 @@ static void OutputReleaseDate(const int tabs[MAXTABS], char *wadname)
         C_TabbedOutput(tabs, INDENT "Release date\tOctober 11, 2021");
     else if (REKKR)
         C_TabbedOutput(tabs, INDENT "Release date\tJuly 10, 2018");
+    else if (ID1)
+        C_TabbedOutput(tabs, INDENT "Release date\tAugust 8, 2024");
 }
 
 static void mapstats_func2(char *cmd, char *parms)
@@ -5363,7 +5365,11 @@ static void mapstats_func2(char *cmd, char *parms)
         const Mix_MusicType musictype = Mix_GetMusicType(NULL);
 
         temp = uppercase(mus_playing->name1);
-        M_snprintf(namebuf, sizeof(namebuf), "D_%s", temp);
+        M_snprintf(namebuf, sizeof(namebuf), "H_%s", temp);
+
+        if (W_CheckNumForName(namebuf) == -1)
+            M_snprintf(namebuf, sizeof(namebuf), "D_%s", temp);
+
         C_TabbedOutput(tabs, "Music lump\t%s", namebuf);
         free(temp);
 
@@ -5382,7 +5388,9 @@ static void mapstats_func2(char *cmd, char *parms)
                 || gamemission == pack_nerve))
             C_TabbedOutput(tabs, INDENT "Title\t" ITALICS("%s"), mus_playing->title1);
 
-        if (*musicartist)
+        if (namebuf[0] == 'H' && namebuf[1] == '_')
+            C_TabbedOutput(tabs, INDENT "Artist\tAndrew Hulshult");
+        else if (*musicartist)
             C_TabbedOutput(tabs, INDENT "Artist\t%s", musicartist);
         else if (sigil && gameepisode == 5)
             C_TabbedOutput(tabs, INDENT "Artist\t%s", (buckethead ? "Buckethead" : "James Paddock"));
@@ -5392,7 +5400,7 @@ static void mapstats_func2(char *cmd, char *parms)
             || (gamemode != commercial && gameepisode == 1 && lumps == 2)
             || gamemode == shareware
             || gamemission == pack_nerve)
-            C_TabbedOutput(tabs, INDENT "Artist\t%s", "Bobby Prince");
+            C_TabbedOutput(tabs, INDENT "Artist\tBobby Prince");
 
         if (musmusictype)
             C_TabbedOutput(tabs, INDENT "Format\tMUS");
@@ -5817,7 +5825,10 @@ static bool play_func1(char *cmd, char *parms)
     {
         char    namebuf[9];
 
-        M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
+        M_snprintf(namebuf, sizeof(namebuf), "h_%s", s_music[i].name2);
+
+        if (W_CheckNumForName(namebuf) == -1)
+            M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
 
         if (M_StringCompare(parm, namebuf) && W_CheckNumForName(namebuf) >= 0)
         {
@@ -5833,7 +5844,10 @@ static bool play_func1(char *cmd, char *parms)
 
             if (M_StringCompare(parm, titlebuf))
             {
-                M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
+                M_snprintf(namebuf, sizeof(namebuf), "h_%s", s_music[i].name2);
+
+                if (W_CheckNumForName(namebuf) == -1)
+                    M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
 
                 if (W_CheckNumForName(namebuf) >= 0)
                 {
@@ -5853,7 +5867,10 @@ static bool play_func1(char *cmd, char *parms)
 
                 if (M_StringCompare(parm, titlebuf))
                 {
-                    M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
+                    M_snprintf(namebuf, sizeof(namebuf), "h_%s", s_music[i].name2);
+
+                    if (W_CheckNumForName(namebuf) == -1)
+                        M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
 
                     if (W_CheckNumForName(namebuf) >= 0)
                     {
@@ -5873,7 +5890,10 @@ static bool play_func1(char *cmd, char *parms)
 
                     if (M_StringCompare(parm, titlebuf))
                     {
-                        M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
+                        M_snprintf(namebuf, sizeof(namebuf), "h_%s", s_music[i].name2);
+
+                        if (W_CheckNumForName(namebuf) == -1)
+                            M_snprintf(namebuf, sizeof(namebuf), "d_%s", s_music[i].name2);
 
                         if (W_CheckNumForName(namebuf) >= 0)
                         {
