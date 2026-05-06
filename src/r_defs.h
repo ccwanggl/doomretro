@@ -219,8 +219,6 @@ typedef struct sector_s
 
     bool                islift;
     bool                isselfreferencing;
-
-    bool                mapped;
 } sector_t;
 
 //

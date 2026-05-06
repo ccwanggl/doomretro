@@ -125,8 +125,6 @@ bool EV_Teleport(const line_t *line, const int side, mobj_t *thing)
                         teleportzoom = I_GetTimeMS() + teleportzoomduration;
                         setsizeneeded = true;
                     }
-
-                    thing->subsector->sector->mapped = true;
                 }
 
                 thing->angle = m->angle;
@@ -211,8 +209,6 @@ bool EV_SilentTeleport(const line_t *line, const int side, mobj_t *thing)
                         player->deltaviewheight = deltaviewheight;
 
                         thing->angle += angle;
-
-                        thing->subsector->sector->mapped = true;
                     }
                     else
                         thing->angle = angle;
@@ -343,8 +339,6 @@ bool EV_SilentLineTeleport(const line_t *line, int side, mobj_t *thing, const bo
 
                     // Reset the delta to have the same dynamics as before
                     player->deltaviewheight = deltaviewheight;
-
-                    thing->subsector->sector->mapped = true;
 
                     thing->angle += angle;
                 }
