@@ -50,19 +50,29 @@ void T_PlatStay(plat_t *plat) {}
 void T_PlatRaise(plat_t *plat)
 {
     result_e    res;
+    fixed_t     oldfloorheight = plat->sector->floorheight;
 
     switch (plat->status)
     {
         case up:
             res = T_MovePlane(plat->sector, plat->speed, plat->high, plat->crush, 0, 1);
 
-            if ((plat->type == RaiseAndChange || plat->type == RaiseToNearestAndChange) && !(maptime & 7))
-                S_StartSectorSound(&plat->sector->soundorg, sfx_stnmov);
+            if (plat->sector->floorheight != oldfloorheight)
+            {
+                plat->stopsound = true;
+
+                if ((plat->type == RaiseAndChange || plat->type == RaiseToNearestAndChange) && !(maptime & 7))
+                    S_StartSectorSound(&plat->sector->soundorg, sfx_stnmov);
+            }
 
             if (res == crushed && !plat->crush)
             {
                 plat->count = plat->wait;
                 plat->status = down;
+
+                if (!plat->stopsound && plat->sector->floorheight > plat->low)
+                    plat->stopsound = true;
+
                 S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
             }
             else
@@ -74,7 +84,12 @@ void T_PlatRaise(plat_t *plat)
                     {
                         plat->count = plat->wait;
                         plat->status = waiting;
-                        S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+
+                        if (plat->stopsound)
+                        {
+                            S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+                            plat->stopsound = false;
+                        }
                     }
                     else // else go into stasis awaiting next toggle activation
                     {
@@ -103,6 +118,9 @@ void T_PlatRaise(plat_t *plat)
         case down:
             res = T_MovePlane(plat->sector, plat->speed, plat->low, false, 0, -1);
 
+            if (plat->sector->floorheight != oldfloorheight)
+                plat->stopsound = true;
+
             if (res == pastdest)
             {
                 // if not an instant toggle, start waiting, make plat stop sound
@@ -110,7 +128,12 @@ void T_PlatRaise(plat_t *plat)
                 {                                       // is silent, instant, no waiting
                     plat->count = plat->wait;
                     plat->status = waiting;
-                    S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+
+                    if (plat->stopsound)
+                    {
+                        S_StartSectorSound(&plat->sector->soundorg, sfx_pstop);
+                        plat->stopsound = false;
+                    }
                 }
                 else    // instant toggles go into stasis awaiting next activation
                 {
@@ -137,7 +160,10 @@ void T_PlatRaise(plat_t *plat)
             if (!--plat->count)
             {
                 plat->status = (plat->sector->floorheight == plat->low ? up : down);
-                S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
+
+                if ((plat->status == up && plat->sector->floorheight < MIN(plat->high, plat->sector->ceilingheight))
+                    || (plat->status == down && plat->sector->floorheight > plat->low))
+                    S_StartSectorSound(&plat->sector->soundorg, sfx_pstart);
             }
 
             break;
@@ -207,6 +233,7 @@ manual_plat:
         plat->sector->floordata = plat;
         plat->tag = line->tag;
         plat->low = sec->floorheight;
+        plat->status = waiting;
 
         switch (type)
         {
@@ -217,7 +244,10 @@ manual_plat:
                 plat->high = P_FindNextHighestFloor(sec, sec->floorheight);
                 plat->status = up;
                 sec->special = 0;
-                S_StartSectorSound(&sec->soundorg, sfx_stnmov);
+
+                if (sec->floorheight < MIN(plat->high, sec->ceilingheight))
+                    S_StartSectorSound(&sec->soundorg, sfx_stnmov);
+
                 break;
 
             case RaiseAndChange:
@@ -226,7 +256,10 @@ manual_plat:
                 P_CheckTerrainType(sec);
                 plat->high = sec->floorheight + amount * FRACUNIT;
                 plat->status = up;
-                S_StartSectorSound(&sec->soundorg, sfx_stnmov);
+
+                if (sec->floorheight < MIN(plat->high, sec->ceilingheight))
+                    S_StartSectorSound(&sec->soundorg, sfx_stnmov);
+
                 break;
 
             case DownWaitUpStay:
@@ -235,7 +268,10 @@ manual_plat:
                 plat->high = sec->floorheight;
                 plat->wait = TICRATE * PLATWAIT;
                 plat->status = down;
-                S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
+                if (sec->floorheight > plat->low)
+                    S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
                 break;
 
             case BlazeDWUS:
@@ -244,7 +280,10 @@ manual_plat:
                 plat->high = sec->floorheight;
                 plat->wait = TICRATE * PLATWAIT;
                 plat->status = down;
-                S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
+                if (sec->floorheight > plat->low)
+                    S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
                 break;
 
             case PerpetualRaise:
@@ -253,7 +292,11 @@ manual_plat:
                 plat->high = MAX(sec->floorheight, P_FindHighestFloorSurrounding(sec));
                 plat->wait = TICRATE * PLATWAIT;
                 plat->status = (plat_e)(M_Random() & 1);
-                S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
+                if ((plat->status == up && sec->floorheight < MIN(plat->high, sec->ceilingheight))
+                    || (plat->status == down && sec->floorheight > plat->low))
+                    S_StartSectorSound(&sec->soundorg, sfx_pstart);
+
                 break;
 
             case ToggleUpDn:                        // jff 03/14/98 add new type to support instant toggle

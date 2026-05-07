@@ -815,6 +815,9 @@ static void saveg_read_plat_t(plat_t *str)
     str->crush = saveg_read_bool();
     str->tag = saveg_read32();
     str->type = (plattype_e)saveg_read_enum();
+
+    if (M_StringCompare(savegameversion, DOOMRETRO_SAVEGAMEVERSION_6_0))
+        str->stopsound = saveg_read_bool();
 }
 
 static void saveg_write_plat_t(const plat_t *str)
@@ -831,6 +834,7 @@ static void saveg_write_plat_t(const plat_t *str)
     saveg_write_bool(str->crush);
     saveg_write32(str->tag);
     saveg_write_enum(str->type);
+    saveg_write_bool(str->stopsound);
 }
 
 //

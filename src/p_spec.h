@@ -284,6 +284,7 @@ typedef struct
     plat_e              status;
     plat_e              oldstatus;
     bool                crush;
+    bool                stopsound;
     int                 tag;
     plattype_e          type;
 
